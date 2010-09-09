@@ -21,10 +21,10 @@ namespace ParseInContext;
 
 abstract class CatchAllContext extends Context
 {
-    protected $_value;
+    protected $_value = '';
     
     public function __call($method, $args)
     {
-        $this->_value .= $args[0];
+        $this->_value = trim($this->_value . ' ' . $args[0]);
     }
 }
