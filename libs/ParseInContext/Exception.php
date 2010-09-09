@@ -19,6 +19,6 @@
  
 namespace ParseInContext;
 
-class ParserException extends \Exception
+class Exception extends \Exception
 {
 }

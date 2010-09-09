@@ -22,36 +22,33 @@ namespace ParseInContext;
 abstract class Context
 {
 	/** @var AbstractParser */
-	protected $parser;
+	protected $_parser;
 	
 	/** @var array */
-	protected $tokens = array();
+	protected $_params;
 	
 	/** @var array */
-	protected $params;
-	
-	/** @var array */
-	protected $exitData;
+	protected $_exitData;
 	
 	/** @var bool */
-	protected $exitContext;
+	protected $_exitContext;
 	
 	/**
 	 * @param AbstractParser $parser
 	 */
-	public function __construct(AbstractParser $parser, $params = array())
+	public function __construct(AbstractParser $parser, array $params = array())
 	{
-		$this->parser = $parser;
-		$this->params = $params;
-		$this->exitData = '';
-		$this->exitContext = false;
-		$this->init();
+		$this->_parser = $parser;
+		$this->_params = $params;
+		$this->_exitData = '';
+		$this->_exitContext = false;
+		$this->_init();
 	}
 	
 	/**
 	 * Context logic when initialized
 	 */
-	protected function init()
+	protected function _init()
 	{
 	}
 	
@@ -60,7 +57,7 @@ abstract class Context
 	 */
 	public function getParser()
 	{
-		return $this->parser;
+		return $this->_parser;
 	}
 	
 	/**
@@ -69,19 +66,20 @@ abstract class Context
 	 */
 	public function hasParam($name)
 	{
-		return array_key_exists($name, $this->params);
+		return array_key_exists($name, $this->_params);
 	}
 	
 	/**
 	 * @param string $name
+	 * @param mixed $default
 	 * @return mixed
 	 */
-	public function getParam($name)
+	public function getParam($name, $default = null)
 	{
 		if (!$this->hasParam($name)) {
-			throw new ParserException('Missing parameter ' . $name . ' in context ' . get_class($this));
+			return $default;
 		}
-		return $this->params[$name];
+		return $this->_params[$name];
 	}
 	
 	/**
@@ -89,7 +87,7 @@ abstract class Context
 	 */
 	public function getParams()
 	{
-		return $this->params;
+		return $this->_params;
 	}
 	
 	/**
@@ -99,7 +97,7 @@ abstract class Context
 	 */
 	public function enterContext($context, array $params = array())
 	{
-	    return $this->getParser()->enterContext($context, $params);
+	    return $this->_parser->enterContext($context, $params);
 	}
 	
 	/**
@@ -109,18 +107,8 @@ abstract class Context
 	 */
 	public function exitContext($data = array())
 	{
-		$this->exitData = $data;
-		$this->exitContext = true;
-	}
-	
-	/**
-	 * Get tokens for the current context
-	 *
-	 * @return array
-	 */
-	public function getTokens()
-	{
-		return $this->tokens;
+		$this->_exitData = $data;
+		$this->_exitContext = true;
 	}
 	
 	/**
@@ -130,18 +118,18 @@ abstract class Context
 	 * @param string $data
 	 * @return mixed
 	 */
-	public function execute($token, $data)
+	public function execute($token, $data = null)
 	{
 		$method = 'token' . ucfirst($token);
 		if (!method_exists($this, $method) && !method_exists($this, '__call')) {
 			return null;
 		}
 		
-		$this->beforeToken();
+		$this->_beforeToken();
 		$this->{$method}($data);
-		$this->afterToken();
+		$this->_afterToken();
 		
-		return $this->exitContext;
+		return $this->_exitContext;
 	}
 	
 	/**
@@ -149,28 +137,20 @@ abstract class Context
 	 */
 	public function getExitData()
 	{
-		return $this->exitData;
+		return $this->_exitData;
 	}
 	
 	/**
 	 * Method called before a specific token method
 	 */
-	protected function beforeToken()
+	protected function _beforeToken()
 	{
 	}
 	
 	/**
 	 * Method called after a specific token method
 	 */
-	protected function afterToken()
+	protected function _afterToken()
 	{
-	}
-	
-	/**
-	 * End of file reached by parser
-	 */
-	public function tokenEof($data)
-	{
-		$this->exitContext();
 	}
 }

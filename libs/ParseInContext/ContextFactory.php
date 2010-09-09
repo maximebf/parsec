@@ -26,7 +26,7 @@ namespace ParseInContext;
 class ContextFactory
 {
     /** @var array */
-	protected $namespaces = array();
+	protected $_namespaces = array();
 	
 	/**
 	 * Registers a very simple autoloader which relies
@@ -45,7 +45,7 @@ class ContextFactory
 	 */
 	public function __construct(array $namespaces = array())
 	{
-	    $this->namespaces = $namespaces;
+	    $this->_namespaces = $namespaces;
 	}
 	
 	/**
@@ -55,7 +55,7 @@ class ContextFactory
 	 */
 	public function createInstance($className, array $constructorArgs = array())
 	{
-		foreach ($this->namespaces as $namespace) {
+		foreach ($this->_namespaces as $namespace) {
 			if (class_exists($namespace . $className)) {
 				$class = new \ReflectionClass($className);
 				return $class->newInstanceArgs($constructorArgs);
@@ -70,7 +70,7 @@ class ContextFactory
 	 */
 	public function setNamespaces(array $namespaces)
 	{
-		$this->namespaces = $namespaces;
+		$this->_namespaces = $namespaces;
 		return $this;
 	}
 	
@@ -80,7 +80,7 @@ class ContextFactory
 	 */
 	public function addNamespace($namespace)
 	{
-		$this->namespaces[] = rtrim((string) $namespace, '\\') . '\\';
+		$this->_namespaces[] = rtrim((string) $namespace, '\\') . '\\';
 		return $this;
 	}
 	
@@ -89,6 +89,6 @@ class ContextFactory
 	 */
 	public function getNamespaces()
 	{
-		return $this->namespaces;
+		return $this->_namespaces;
 	}
 }

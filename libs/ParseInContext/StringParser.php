@@ -23,15 +23,47 @@ namespace ParseInContext;
  * Parses a string according to tokens
  */
 class StringParser extends AbstractParser
-{	
-	/** @var int */
-	protected $offset;
+{
+    const TOKEN_EOS = 'eos';
+    const TOKEN_TEXT = 'text';
+    
+	/** @var Lexer */
+	protected $_lexer;
+	
+	/** @var array */
+	protected $_tokens = array();
 	
 	/** @var int */
-	protected $length;
+	protected $_position = 0;
 	
-	/** @var bool */
-	protected $autoTrim = false;
+	/** @var int */
+	protected $_count = 0;
+	
+	/**
+	 * @param Lexer $lexer
+	 * @param ContextFactory $contextFactory
+	 */
+	public function __construct(Lexer $lexer = null, ContextFactory $contextFactory = null)
+	{
+	    $this->_lexer = $lexer;
+		$this->_contextFactory = $contextFactory;
+	}
+	
+	/**
+	 * @param Lexer $lexer
+	 */
+	public function setLexer(Lexer $lexer)
+	{
+		$this->_lexer = $lexer;
+	}
+	
+	/**
+	 * @return Lexer
+	 */
+	public function getLexer()
+	{
+		return $this->_lexer;
+	}
 	
 	/**
 	 * Parse the specified string. 
@@ -42,11 +74,12 @@ class StringParser extends AbstractParser
 	 * @param array $params Context parameters
 	 * @return mixed Data returned by the context
 	 */
-	public function parse($string, $context, $params = array())
+	public function parse($string, $context, array $params = array())
 	{
-		$this->data = $string;
-		$this->offset = 0;
-		$this->length = strlen($string);
+		$this->_data = $string;
+		$this->_tokens = $this->_lexer->tokenize($string);
+		$this->_position = 0;
+		$this->_count = count($this->_tokens);
 		
 		return $this->enterContext($context, $params);
 	}
@@ -56,91 +89,28 @@ class StringParser extends AbstractParser
 	 * @param array $params Context parameters
 	 * @return mixed Data returned by context
 	 */
-	public function enterContext($context, array $params = array())
+	public function enterContext($contextName, array $params = array())
 	{
-		$instance = $this->createContextInstance($context, array($this, $params));
+		$context = $this->createContextInstance($contextName, array($this, $params));
 		
-		// parser loop
-		while ($this->offset <= $this->length) {
-			// search for the next token
-			list($token, $text) = $this->gotoNextToken($instance->getTokens());
-			// execute action for the token
-			$contextEnd = $instance->execute($token, $text);
-			if ($contextEnd) {
-				break;
-			}
+		while (($i = $this->_position++) <= $this->_count) {
+		    $token = null; $value = null;
+		    
+		    if ($i == $this->_count) {
+		        $token = self::TOKEN_EOS;
+		    } else if (is_string($this->_tokens[$i])) {
+		        $token = self::TOKEN_TEXT;
+		        $value = $this->_tokens[$i];
+		    } else {
+		        $token = $this->_tokens[$i]['token'];
+		        $value = $this->_tokens[$i]['value'];
+		    }
+		    
+		    if ($context->execute($token, $value)) {
+		        break;
+		    }
 		}
 		
-		$data = $instance->getExitData();
-		return $data;
-	}
-	
-	/**
-	 * Goto the next token and return the text between the last token and the newly found one
-	 *
-	 * @return array An array with the token name as first element and the text as second
-	 */
-	public function gotoNextToken($additionalTokens = array())
-	{
-		list($token, $nextOffset) = $this->getNextToken($additionalTokens);
-		
-		$text = substr($this->data, $this->offset, $nextOffset - $this->offset);
-		$this->offset = $nextOffset + 1;
-		
-		if ($this->autoTrim) {
-		    $text = trim($text);
-		}
-		
-		return array($token, $text);
-	}
-	
-	/**
-	 * Get the next token
-	 *
-	 * @return array Array with the token name as the first element and the offset as the second
-	 */
-	public function getNextToken($additionalTokens = array())
-	{
-		$tokens = array_merge($this->tokens, $additionalTokens);
-		$token = self::EOF;
-		$nextOffset = $this->length;
-		foreach ($tokens as $name => $regexp) {
-			if(preg_match('/' . $regexp . '/m', $this->data, $matches, PREG_OFFSET_CAPTURE, $this->offset)) {
-				if ($nextOffset > $matches[0][1]) {
-					$token = $name;
-					$nextOffset = $matches[0][1];
-				}
-			}
-		}
-		return array($token, $nextOffset);
-	}
-	
-	/**
-	 * @param int $offset
-	 */
-	public function _setOffset($offset)
-	{
-		if ($offset > $this->length) {
-			throw new ParserException('Offset must be less than the length');
-		}
-		$this->offset = $offset;
-	}
-	
-	/**
-	 * @return int
-	 */
-	public function _getOffset()
-	{
-		return $this->offset;
-	}
-	
-	/**
-	 * Returns the length of the string being parsed
-	 *
-	 * @return int
-	 */
-	public function _getLength()
-	{
-		return $this->length;
+		return $context->getExitData();
 	}
 }

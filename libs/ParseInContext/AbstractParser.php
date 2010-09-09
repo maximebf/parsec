@@ -24,24 +24,18 @@ namespace ParseInContext;
  */
 abstract class AbstractParser
 {
-	/** End of file token */
-	const EOF = 'Eof';
-	
 	/** @var ContextFactory */
-	protected $contextFactory;
-	
-	/** @var array */
-	protected $tokens = array();
+	protected $_contextFactory;
 	
 	/** @var mixed */
-	protected $data;
+	protected $_data;
 	
 	/**
 	 * @param ContextFactory $contextFactory
 	 */
 	public function __construct(ContextFactory $contextFactory = null)
 	{
-		$this->contextFactory = $contextFactory;
+		$this->_contextFactory = $contextFactory;
 	}
 	
 	/**
@@ -49,7 +43,7 @@ abstract class AbstractParser
 	 */
 	public function setContextFactory(ContextFactory $factory)
 	{
-		$this->contextFactory = $factory;
+		$this->_contextFactory = $factory;
 	}
 	
 	/**
@@ -57,40 +51,7 @@ abstract class AbstractParser
 	 */
 	public function getContextFactory()
 	{
-		return $this->contextFactory;
-	}
-	
-	/**
-	 * @param string $name
-	 * @param string $regexp
-	 */
-	public function setToken($name, $regexp)
-	{
-		$this->tokens[$name] = $regexp;
-	}
-	
-	/**
-	 * @param string $name
-	 */
-	public function removeToken($name)
-	{
-		if (!array_key_exists($name, $this->tokens)) {
-			throw new ParserException('Token ' . $name . ' does not exists');
-		}
-		unset($this->tokens[$name]);
-	}
-	
-	public function clearTokens()
-	{
-		$this->tokens = array();
-	}
-	
-	/**
-	 * @return array
-	 */
-	public function getTokens()
-	{
-		return $this->tokens;
+		return $this->_contextFactory;
 	}
 	
 	/**
@@ -98,7 +59,7 @@ abstract class AbstractParser
 	 */
 	public function setData($data)
 	{
-		$this->data = $data;
+		$this->_data = $data;
 	}
 	
 	/**
@@ -106,7 +67,7 @@ abstract class AbstractParser
 	 */
 	public function getData()
 	{
-		return $this->data;
+		return $this->_data;
 	}
 	
 	/**

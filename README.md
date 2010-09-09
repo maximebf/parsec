@@ -1,10 +1,10 @@
 # ParseInContext
 
 Allows to create contextual text parser in PHP 5.3. You can split the parsing in contexts, entering and living them at will.
-You can even create recursive contexts. A context then reacts to tokens.
+You can even create recursive contexts. A context reacts to tokens.
 
-The examples below creates a really simple arithmetic parser (no operator priority). You can find the source code
-in the demo folder.
+The examples below create a really simple arithmetic parser (no operator priority). 
+You can find the source code in the demo folder.
 
 You must use an autoloader to use ParseInContext. You can use the one included (very basic) using:
 
@@ -13,29 +13,43 @@ You must use an autoloader to use ParseInContext. You can use the one included (
     
 (You must setup your include paths before using it)
 
-## Creating a parser and some tokens
+## Creating a lexer
 
-Create a class inherting from StringParser. You can define tokens as an associative array where keys are token names
-and values a regular expression (without /).
-Override the constructor to register the namespace where your contexts are located.
+Before parsing a string, it must be tokenized first. This is done using a lexer.
+Tokens are defined as an associative array where keys are token names and values are regular expression (without /).
+
+    $lexer = new \ParseInContext\Lexer(array(
+        'number' => '[0-9]+',
+        'plus' => '\+',
+        'minus' => '\-',
+        'multi' => '\*',
+        'div' => '\/',
+        'bracketOpen' => '\(',
+        'bracketClose' => '\)'
+    ));
+
+## Creating a parser
+
+Create a class inherting from StringParser. 
+Override the constructor to register a lexer and the namespace where your contexts are located.
 Finally, override the parse method to specify the context in which to start.
     
     class ArithParser extends \ParseInContext\StringParser
     {
-        protected $tokens = array(
-            'plus' => '\+',
-            'minus' => '\-',
-            'multi' => '\*',
-            'div' => '\/',
-            'bracketOpen' => '\(',
-            'bracketClose' => '\)'
-        );
-        
-        protected $autoTrim = true;
-        
         public function __construct()
         {
-            parent::__construct(new \ParseInContext\ContextFactory(array('\\')));
+            $factory = new \ParseInContext\ContextFactory(array('\\'));
+            $lexer = new \ParseInContext\Lexer(array(
+                'number' => '[0-9]+',
+                'plus' => '\+',
+                'minus' => '\-',
+                'multi' => '\*',
+                'div' => '\/',
+                'bracketOpen' => '\(',
+                'bracketClose' => '\)'
+            ));
+            
+            parent::__construct($lexer, $factory);
         }
         
         public function parse($string)
@@ -55,42 +69,49 @@ This last method takes one argument which will be returned as the result for the
 
     class Expression extends \ParseInContext\Context
     {
-        public function tokenPlus($text)
+        protected $_number;
+        
+        public function tokenNumber($value)
         {
-            $this->exitContext($text + $this->enterContext('Expression'));
+            $this->_number = $value;
         }
         
-        public function tokenMinus($text)
+        public function tokenPlus()
         {
-            $this->exitContext($text - $this->enterContext('Expression'));
+            $this->exitContext($this->_number + $this->enterContext('Expression'));
         }
         
-        public function tokenMulti($text)
+        public function tokenMinus()
         {
-            $this->exitContext($text * $this->enterContext('Expression'));
+            $this->exitContext($this->_number - $this->enterContext('Expression'));
         }
         
-        public function tokenDiv($text)
+        public function tokenMulti()
         {
-            $this->exitContext($text / $this->enterContext('Expression'));
+            $this->exitContext($this->_number * $this->enterContext('Expression'));
         }
         
-        public function tokenBracketOpen($text)
+        public function tokenDiv()
         {
-            if (empty($text)) {
-                $text = 1;
+            $this->exitContext($this->_number / $this->enterContext('Expression'));
+        }
+        
+        public function tokenBracketOpen()
+        {
+            if ($this->_number === null) {
+                $this->_number = 1;
             }
-            $this->exitContext($text * $this->enterContext('Expression'));
+            $this->exitContext($this->_number * $this->enterContext('Expression'));
         }
         
-        public function tokenBracketClose($text)
+        public function tokenBracketClose()
         {
-            $this->exitContext($text);
+            $this->exitContext($this->_number);
         }
         
-        public function tokenEof($text)
+        public function tokenEos($text)
         {
-            $this->exitContext($text);
+            $this->exitContext($this->_number);
         }
     }
     
