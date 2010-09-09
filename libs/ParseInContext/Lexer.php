@@ -141,7 +141,7 @@ class Lexer
 		list($token, $value, $nextOffset) = $this->getNextToken();
 		
 		$text = substr($this->_data, $this->_offset, $nextOffset - $this->_offset);
-		$this->_offset = $nextOffset + 1;
+		$this->_offset = $nextOffset + (strlen($value) ?: 1);
 		
 		if ($this->_ignoreWhitespace) {
 		    $text = trim($text);
