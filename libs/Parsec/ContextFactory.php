@@ -1,6 +1,6 @@
 <?php
 /**
- * Harmony
+ * Parsec
  * Copyright (c) 2010 Maxime Bouroumeau-Fuseau
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -14,10 +14,12 @@
  * @author Maxime Bouroumeau-Fuseau
  * @copyright 2010 (c) Maxime Bouroumeau-Fuseau
  * @license http://www.opensource.org/licenses/mit-license.php
- * @link http://github.com/maximebf
+ * @link http://github.com/maximebf/parsec
  */
  
-namespace ParseInContext;
+namespace Parsec;
+
+use ReflectionClass;
 
 /**
  * Creates an object of the specified class under one
@@ -57,7 +59,7 @@ class ContextFactory
 	{
 		foreach ($this->_namespaces as $namespace) {
 			if (class_exists($namespace . $className)) {
-				$class = new \ReflectionClass($namespace . $className);
+				$class = new ReflectionClass($namespace . $className);
 				return $class->newInstanceArgs($constructorArgs);
 			}
 		}

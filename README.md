@@ -1,4 +1,4 @@
-# ParseInContext
+# Parsec
 
 Allows to create contextual text parser in PHP 5.3. You can split the parsing in contexts, entering and living them at will.
 You can even create recursive contexts. A context reacts to tokens.
@@ -6,10 +6,10 @@ You can even create recursive contexts. A context reacts to tokens.
 The examples below create a really simple arithmetic parser (no operator priority). 
 You can find the source code in the demo folder.
 
-You must use an autoloader to use ParseInContext. You can use the one included (very basic) using:
+You must use an autoloader to use Parsec. You can use the one included (very basic) using:
 
-    require_once 'ParseInContext/ContextFactory.php';
-    \ParseInContext\ContextFactory::registerAutoloader();
+    require_once 'Parsec/ContextFactory.php';
+    Parsec\ContextFactory::registerAutoloader();
     
 (You must setup your include paths before using it)
 
@@ -18,7 +18,7 @@ You must use an autoloader to use ParseInContext. You can use the one included (
 Before parsing a string, it must be tokenized first. This is done using a lexer.
 Tokens are defined as an associative array where keys are token names and values are regular expression (without /).
 
-    $lexer = new \ParseInContext\Lexer(array(
+    $lexer = new Parsec\Lexer(array(
         'number' => '[0-9]+',
         'plus' => '\+',
         'minus' => '\-',
@@ -27,19 +27,23 @@ Tokens are defined as an associative array where keys are token names and values
         'bracketOpen' => '\(',
         'bracketClose' => '\)'
     ));
+    
+    $tokens = $lexer->tokenize($string);
+    
+The result of the last line is an array similar to the result of php's token_get_all()
 
 ## Creating a parser
 
-Create a class inherting from StringParser. 
+Create a class inheriting from Parsec\StringParser. 
 Override the constructor to register a lexer and the namespace where your contexts are located.
 Finally, override the parse method to specify the context in which to start.
     
-    class ArithParser extends \ParseInContext\StringParser
+    class ArithParser extends Parsec\StringParser
     {
         public function __construct()
         {
-            $factory = new \ParseInContext\ContextFactory(array('\\'));
-            $lexer = new \ParseInContext\Lexer(array(
+            $factory = new Parsec\ContextFactory(array('\\'));
+            $lexer = new Parsec\Lexer(array(
                 'number' => '[0-9]+',
                 'plus' => '\+',
                 'minus' => '\-',
@@ -67,7 +71,9 @@ methods will receive the text between the previous token and the current one as 
 You can enter a new context using the enterContext() method or exit the current one using exitContext().
 This last method takes one argument which will be returned as the result for the context.
 
-    class Expression extends \ParseInContext\Context
+Then token "eos" (End Of String) will be automatically appended to the tokens array.
+
+    class Expression extends Parsec\Context
     {
         protected $_number;
         

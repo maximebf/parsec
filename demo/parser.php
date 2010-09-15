@@ -5,15 +5,15 @@ set_include_path(implode(PATH_SEPARATOR, array(
     get_include_path()
 )));
 
-require_once 'ParseInContext/ContextFactory.php';
-\ParseInContext\ContextFactory::registerAutoloader();
+require_once 'Parsec/ContextFactory.php';
+Parsec\ContextFactory::registerAutoloader();
 
-class ArithParser extends \ParseInContext\StringParser
+class ArithParser extends Parsec\StringParser
 {
     public function __construct()
     {
-        $factory = new \ParseInContext\ContextFactory(array('\\'));
-        $lexer = new \ParseInContext\Lexer(array(
+        $factory = new Parsec\ContextFactory(array('\\'));
+        $lexer = new Parsec\Lexer(array(
             'number' => '[0-9]+',
             'plus' => '\+',
             'minus' => '\-',
@@ -32,7 +32,7 @@ class ArithParser extends \ParseInContext\StringParser
     }
 }
 
-class Expression extends \ParseInContext\Context
+class Expression extends Parsec\Context
 {
     protected $_number;
     

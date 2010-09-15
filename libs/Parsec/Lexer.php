@@ -1,6 +1,6 @@
 <?php
 /**
- * Harmony
+ * Parsec
  * Copyright (c) 2010 Maxime Bouroumeau-Fuseau
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -14,10 +14,10 @@
  * @author Maxime Bouroumeau-Fuseau
  * @copyright 2010 (c) Maxime Bouroumeau-Fuseau
  * @license http://www.opensource.org/licenses/mit-license.php
- * @link http://github.com/maximebf
+ * @link http://github.com/maximebf/parsec
  */
  
-namespace ParseInContext;
+namespace Parsec;
 
 /**
  * Returns a tokenized representation of a string

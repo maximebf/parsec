@@ -5,9 +5,9 @@ set_include_path(implode(PATH_SEPARATOR, array(
     get_include_path()
 )));
 
-require_once 'ParseInContext/Lexer.php';
+require_once 'Parsec/Lexer.php';
 
-$lexer = new \ParseInContext\Lexer(array(
+$lexer = new Parsec\Lexer(array(
     'number' => '[0-9]+',
     'plus' => '\+',
     'minus' => '\-',

@@ -1,6 +1,6 @@
 <?php
 /**
- * Harmony
+ * Parsec
  * Copyright (c) 2010 Maxime Bouroumeau-Fuseau
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -14,11 +14,18 @@
  * @author Maxime Bouroumeau-Fuseau
  * @copyright 2010 (c) Maxime Bouroumeau-Fuseau
  * @license http://www.opensource.org/licenses/mit-license.php
- * @link http://github.com/maximebf
+ * @link http://github.com/maximebf/parsec
  */
  
-namespace ParseInContext;
+namespace Parsec;
 
+/**
+ * A contexts handles the parsing of a group of tokens.
+ *
+ * Contexts can branch out and use other contexts to parse parts of the
+ * tokens array. This allows to organize your parser into a logical flow.
+ * Contexts can be recursive and can returns data.
+ */
 abstract class Context
 {
 	/** @var AbstractParser */

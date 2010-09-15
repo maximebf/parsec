@@ -1,6 +1,6 @@
 <?php
 /**
- * Harmony
+ * Parsec
  * Copyright (c) 2010 Maxime Bouroumeau-Fuseau
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -14,17 +14,21 @@
  * @author Maxime Bouroumeau-Fuseau
  * @copyright 2010 (c) Maxime Bouroumeau-Fuseau
  * @license http://www.opensource.org/licenses/mit-license.php
- * @link http://github.com/maximebf
+ * @link http://github.com/maximebf/parsec
  */
  
-namespace ParseInContext;
+namespace Parsec;
 
+/**
+ * A context that will catch all uncatch tokens and appends them to $_value
+ */
 abstract class CatchAllContext extends Context
 {
+    /** @var string */
     protected $_value = '';
     
     public function __call($method, $args)
     {
-        $this->_value = trim($this->_value . ' ' . $args[0]);
+        $this->_value .= $args[0];
     }
 }
