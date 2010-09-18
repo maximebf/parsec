@@ -1,22 +1,23 @@
 # Parsec
 
-Allows to create contextual text parser in PHP 5.3. You can split the parsing in contexts, entering and living them at will.
-You can even create recursive contexts. A context reacts to tokens.
+**Contextual text parser in PHP 5.3.**
 
-The examples below create a really simple arithmetic parser (no operator priority). 
-You can find the source code in the demo folder.
+Parsec is a really simple parser toolkit which can be used to create small [DSL](http://en.wikipedia.org/wiki/Domain-specific_language) in PHP.
 
-You must use an autoloader to use Parsec. You can use the one included (very basic) using:
+In the example below, a really simple arithmetic parser (no operator priority) will be created. 
+The source code of this example is located in the demo folder.
+
+An autoloader must be used for Parsec to work. A very basic one is included and can be registered using:
 
     require_once 'Parsec/ContextFactory.php';
     Parsec\ContextFactory::registerAutoloader();
     
-(You must setup your include paths before using it)
+(Include paths must be properly configure)
 
 ## Creating a lexer
 
-Before parsing a string, it must be tokenized first. This is done using a lexer.
-Tokens are defined as an associative array where keys are token names and values are regular expression (without /).
+A string must be tokenized using a [lexer](http://en.wikipedia.org/wiki/Lexical_analysis) before being parsed.
+Lexers can be created using the Parsec\Lexer class. Tokens are defined as an associative array where keys are their name and values are a regular expression without the delimiting characters (forward slash, you'll need to escape characters).
 
     $lexer = new Parsec\Lexer(array(
         'number' => '[0-9]+',
@@ -30,13 +31,13 @@ Tokens are defined as an associative array where keys are token names and values
     
     $tokens = $lexer->tokenize($string);
     
-The result of the last line is an array similar to the result of php's token_get_all()
+The result of the last line is an array with each token represented as an associative array with a 'token' key and a 'value' key. Unmatched strings are added to the array as well.
 
 ## Creating a parser
 
-Create a class inheriting from Parsec\StringParser. 
-Override the constructor to register a lexer and the namespace where your contexts are located.
-Finally, override the parse method to specify the context in which to start.
+As most of parsers are meant to parse text, Parsec includes the Parsec\StringParser class. It already provides all the needed code to loop through the token array. Parsers can also be created from the ground up using Parsec\AbstractParser.
+
+In the following example, StringParser will be used. Configuring a lexer and a context factory can be done by overriding the constructor. A context factory defines in which namespaces to find context classes. It is also possible to override the parse method to specify the context in which to start.
     
     class ArithParser extends Parsec\StringParser
     {
@@ -64,14 +65,12 @@ Finally, override the parse method to specify the context in which to start.
 
 ## Creating contexts
 
-Contexts are classes which inherit from Context. Creates a method for each token you want to treat
-in this context. Token's method must start with "token" follow by the capitalized token name. These
-methods will receive the text between the previous token and the current one as their only argument.
+Contexts are classes which inherit from Context and which will do something with the tokens. One method must be created for each tokens that need to be handled. These methods must start by "token" followed by the capitalized token name. They will receive the value of the token.
 
-You can enter a new context using the enterContext() method or exit the current one using exitContext().
-This last method takes one argument which will be returned as the result for the context.
+It is possible to enter a new context using the enterContext() method or exit the current one using exitContext().
+This last method takes one argument which will be returned as the result of the context.
 
-Then token "eos" (End Of String) will be automatically appended to the tokens array.
+The "eos" token (End Of String) will be automatically appended to the tokens array. Unmatched string can be caught using the "text" token.
 
     class Expression extends Parsec\Context
     {
