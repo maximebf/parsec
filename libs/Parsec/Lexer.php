@@ -42,6 +42,12 @@ class Lexer
 	/** @var bool */
 	protected $_ignoreWhitespace = true;
 	
+	/** @var array */
+	protected $_lineBreaks = array();
+	
+	/** @var string */
+	protected $_filename;
+	
 	/**
 	 * @param array $tokens
 	 */
@@ -108,23 +114,32 @@ class Lexer
 	 * Parse the specified string and returns an array of tokens
 	 *
 	 * @param string $string
+	 * @param string $filename
 	 * @return array
 	 */
-	public function tokenize($string)
+	public function tokenize($string, $filename = null)
 	{
 		$this->_data = $string;
 		$this->_offset = 0;
 		$this->_length = strlen($string);
-		
+        $this->_filename = $filename;
+		$this->_lineBreaks = array_map(function($v) { return $v[1]; }, 
+		  preg_split("/\n/", $string, -1, PREG_SPLIT_OFFSET_CAPTURE));
+		  
 		$tokens = array();
 		while ($this->_offset <= $this->_length) {
 			// search for the next token
-			list($token, $value, $text) = $this->gotoNextToken();
+			list($token, $value, $text, $offset) = $this->gotoNextToken();
 			if (!empty($text)) {
 			    $tokens[] = $text;
 			}
+			
 			if ($token !== null) {
-    			$tokens[] = array('token' => $token, 'value' => $value);
+    			$tokens[] = array(
+    			    'token' => $token, 
+    			    'value' => $value, 
+    			    'position' => $this->getPosition($offset)
+    			);
     	    }
 		}
 		
@@ -147,7 +162,7 @@ class Lexer
 		    $text = trim($text);
 		}
 		
-		return array($token, $value, $text);
+		return array($token, $value, $text, $nextOffset);
 	}
 	
 	/**
@@ -170,5 +185,29 @@ class Lexer
 			}
 		}
 		return array($token, $value, $nextOffset);
+	}
+	
+	/**
+	 * Returns the position in the file from the offset
+	 * 
+	 * @param string $offset
+	 * @return array
+	 */
+	protected function getPosition($offset)
+	{
+	    $previousBreak = 0;
+	    $breakOffset = 0;
+	    foreach ($this->_lineBreaks as $line => $breakOffset) {
+	        if ($offset > $previousBreak && $offset <= $breakOffset) {
+	            break;
+	        }
+	        $previousBreak = $breakOffset;
+	    }
+	    return array(
+	       'line' => $line,
+	       'character' => $offset - $previousBreak,
+	       'offset' => $offset,
+	       'file' => $this->_filename
+	    );
 	}
 }
