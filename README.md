@@ -11,7 +11,7 @@ An autoloader must be used for Parsec to work. A very basic one is included and 
 
     require_once 'Parsec/ContextFactory.php';
     Parsec\ContextFactory::registerAutoloader();
-    
+
 (Include paths must be properly configure)
 
 ## Creating a lexer
@@ -28,9 +28,8 @@ Lexers can be created using the Parsec\Lexer class. Tokens are defined as an ass
         'bracketOpen' => '\(',
         'bracketClose' => '\)'
     ));
-    
     $tokens = $lexer->tokenize($string);
-    
+
 The result of the last line is an array with each token represented as an associative array with a 'token' key and a 'value' key. Unmatched strings are added to the array as well.
 
 ## Creating a parser
@@ -38,7 +37,7 @@ The result of the last line is an array with each token represented as an associ
 As most of parsers are meant to parse text, Parsec includes the Parsec\StringParser class. It already provides all the needed code to loop through the token array. Parsers can also be created from the ground up using Parsec\AbstractParser.
 
 In the following example, StringParser will be used. Configuring a lexer and a context factory can be done by overriding the constructor. A context factory defines in which namespaces to find context classes. It is also possible to override the parse method to specify the context in which to start.
-    
+
     class ArithParser extends Parsec\StringParser
     {
         public function __construct()
@@ -53,7 +52,6 @@ In the following example, StringParser will be used. Configuring a lexer and a c
                 'bracketOpen' => '\(',
                 'bracketClose' => '\)'
             ));
-            
             parent::__construct($lexer, $factory);
         }
         
