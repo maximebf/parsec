@@ -192,11 +192,22 @@ class StringParser extends AbstractParser
 	}
 	
 	/**
+	 * Returns the next token
 	 * 
-	 * Enter description here ...
+	 * @return array
 	 */
 	public function getNextToken()
 	{
 	    return $this->_tokens[$this->_position];
+	}
+	
+    /**
+     * Returns the next token's value
+     * 
+     * @return string
+     */
+	public function getNextTokenValue()
+	{
+        return $this->_tokens[$this->_position]['value'];
 	}
 }
