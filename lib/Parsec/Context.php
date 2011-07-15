@@ -39,6 +39,12 @@ abstract class Context
 	
 	/** @var bool */
 	protected $_exitContext;
+    
+    /** @var string */
+    protected $_currentToken;
+	
+	/** @var array */
+	protected $_currentTokenPosition;
 	
 	/**
 	 * @param AbstractParser $parser
@@ -123,10 +129,14 @@ abstract class Context
 	 * 
 	 * @param string $token
 	 * @param string $data
+	 * @param array $position
 	 * @return mixed
 	 */
-	public function execute($token, $data = null)
+	public function execute($token, $data = null, $position = null)
 	{
+	    $this->_currentToken = $token;
+	    $this->_currentTokenPosition = $position;
+	    
 		$method = 'token' . ucfirst($token);
 		if (!method_exists($this, $method) && !method_exists($this, '__call')) {
 			return null;
@@ -159,5 +169,23 @@ abstract class Context
 	 */
 	protected function _afterToken()
 	{
+	}
+	
+	/**
+	 * Throws a syntax error exception
+	 * 
+	 * @param string $token
+	 * @param array $position
+	 */
+	protected function _syntaxError($token = null, $position = null)
+	{
+	    $token = $token ?: $this->_currentToken;
+	    $position = $position ?: $this->_currentTokenPosition;
+	    
+	    if ($position !== null) {
+	        $position = " at character {$position['character']} in line {$position['line']} in '{$position['file']}'";
+	    }
+	    
+        throw new SyntaxException("Syntax error, unexpected token '$token'$position");
 	}
 }
