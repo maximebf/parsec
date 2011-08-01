@@ -7,10 +7,12 @@ Parsec is a really simple parser toolkit which can be used to create small [DSL]
 In the example below, a really simple arithmetic parser (no operator priority) will be created. 
 The source code of this example is located in the demo folder.
 
-An autoloader must be used for Parsec to work. A very basic one is included and can be registered using:
+An autoloader must be used for Parsec to work. Example of a simple autoloader:
 
-    require_once 'Parsec/ContextFactory.php';
-    Parsec\ContextFactory::registerAutoloader();
+    spl_autoload_register(function($className) {
+        $filename = str_replace('\\', DIRECTORY_SEPARATOR, trim($className, '\\')) . '.php';
+        require_once $filename;
+    });
 
 (Include paths must be properly configure)
 
@@ -72,49 +74,49 @@ The "eos" token (End Of String) will be automatically appended to the tokens arr
 
     class Expression extends Parsec\Context
     {
-        protected $_number;
+        protected $number;
         
         public function tokenNumber($value)
         {
-            $this->_number = $value;
+            $this->number = $value;
         }
         
         public function tokenPlus()
         {
-            $this->exitContext($this->_number + $this->enterContext('Expression'));
+            $this->exitContext($this->number + $this->enterContext('Expression'));
         }
         
         public function tokenMinus()
         {
-            $this->exitContext($this->_number - $this->enterContext('Expression'));
+            $this->exitContext($this->number - $this->enterContext('Expression'));
         }
         
         public function tokenMulti()
         {
-            $this->exitContext($this->_number * $this->enterContext('Expression'));
+            $this->exitContext($this->number * $this->enterContext('Expression'));
         }
         
         public function tokenDiv()
         {
-            $this->exitContext($this->_number / $this->enterContext('Expression'));
+            $this->exitContext($this->number / $this->enterContext('Expression'));
         }
         
         public function tokenBracketOpen()
         {
-            if ($this->_number === null) {
-                $this->_number = 1;
+            if ($this->number === null) {
+                $this->number = 1;
             }
-            $this->exitContext($this->_number * $this->enterContext('Expression'));
+            $this->exitContext($this->number * $this->enterContext('Expression'));
         }
         
         public function tokenBracketClose()
         {
-            $this->exitContext($this->_number);
+            $this->exitContext($this->number);
         }
         
         public function tokenEos($text)
         {
-            $this->exitContext($this->_number);
+            $this->exitContext($this->number);
         }
     }
     

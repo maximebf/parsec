@@ -25,10 +25,10 @@ namespace Parsec;
 abstract class CatchAllContext extends Context
 {
     /** @var string */
-    protected $_value = '';
+    protected $value = '';
     
     public function __call($method, $args)
     {
-        $this->_value .= $args[0];
+        $this->value .= $args[0];
     }
 }
