@@ -119,46 +119,6 @@ class StringParser extends AbstractParser
         
         return $context->getExitData();
     }
-    
-    /**
-     * Skips the next token
-     * 
-     * @param int $howMany
-     * @return StringParser
-     */
-    public function skipNext($howMany = 1)
-    {
-        $this->cursor += $howMany;
-        return $this;
-    }
-    
-    /**
-     * Skips tokens until the specified one
-     * 
-     * @param string $tokenName
-     * @return StringParser
-     */
-    public function skipUntil($tokenName)
-    {
-        do {
-            $this->cursor++;
-        } while($this->cursor < $this->count && 
-           !$this->isToken($this->tokens[$this->cursor], $tokenName));
-        
-        return $this;
-    }
-
-    /**
-     * Rewinds the parser position
-     *
-     * @param int $howMany
-     * @return StringParser
-     */
-    public function rewind($howMany = 1)
-    {
-        $this->cursor -= $howMany;
-        return $this;
-    }
 
     /**
      * @return array
@@ -204,26 +164,6 @@ class StringParser extends AbstractParser
         }
         return $token['token'];
     }
-    
-    /**
-     * Checks if the next token matches the specified one
-     * 
-     * @param string $token
-     * @return bool
-     */
-    public function isNextToken($tokenName, $ignore = array())
-    {
-        $i = $this->cursor;
-
-        do {
-            $i++;
-            if (!in_array($this->getTokenName($this->tokens[$i]), $ignore)) {
-                break;
-            }
-        } while ($i < $this->count);
-        
-        return $this->isToken($this->tokens[$i], $tokenName);
-    }
 
     /**
      * @return bool
@@ -231,6 +171,92 @@ class StringParser extends AbstractParser
     public function hasMoreTokens()
     {
         return $this->cursor < $this->count;
+    }
+    
+    /**
+     * Skips the next token
+     * 
+     * @param int $howMany
+     * @return StringParser
+     */
+    public function skipNext($howMany = 1)
+    {
+        $this->cursor += $howMany;
+        return $this;
+    }
+    
+    /**
+     * Skips tokens until the specified one
+     * 
+     * @param string $tokenName
+     * @param int $step
+     * @return StringParser
+     */
+    public function skipUntil($tokenName, $step = 1)
+    {
+        do {
+            $this->cursor += $step;
+        } while($this->cursor >= 0 && $this->cursor < $this->count && 
+           !$this->isToken($this->tokens[$this->cursor], $tokenName));
+        
+        return $this;
+    }
+
+    /**
+     * Rewinds the parser position
+     *
+     * @param int $howMany
+     * @return StringParser
+     */
+    public function rewind($howMany = 1)
+    {
+        $this->cursor -= $howMany;
+        return $this;
+    }
+
+    /**
+     * Rewinds tokens until the specified one
+     *
+     * @param string $tokenName
+     * @return StringParser
+     */
+    public function rewindUntil($tokenName)
+    {
+        return $this->skipUntil($tokenName, -1);
+    }
+    
+    /**
+     * Checks if the next token matches the specified one
+     * 
+     * @param string $token
+     * @param array $ignore
+     * @param int $direction
+     * @return bool
+     */
+    public function isNextToken($tokenName, $ignore = array(), $direction = 1)
+    {
+        $i = $this->cursor;
+
+        do {
+            $i += $direction;
+            if (!in_array($this->getTokenName($this->tokens[$i]), $ignore)) {
+                break;
+            }
+        } while ($i >= 0 && $i < $this->count);
+        
+        return $this->isToken($this->tokens[$i], $tokenName);
+    }
+
+    /**
+     * Checks if the previous token matches the specified one
+     * 
+     * @param string $token
+     * @param array $ignore
+     * @return bool
+     */
+    public function isPreviousToken($tokenName, $ignore = array())
+    {
+        return $this->isNextToken($tokenName, $ignore, -1);
     }
     
     /**
@@ -254,5 +280,58 @@ class StringParser extends AbstractParser
     {
         $token = $this->getNextToken($skip);
         return is_array($token) ? $token['value'] : $token;
+    }
+    
+    /**
+     * @param bool $rewind
+     * @return array
+     */
+    public function getPreviousToken($rewind = false)
+    {
+        $token = $this->tokens[$this->cursor - 1];
+        if ($rewind) {
+            $this->cursor--;
+        }
+        return $token;
+    }
+    
+    /**
+     * @param bool $rewind
+     * @return string
+     */
+    public function getPreviousTokenValue($rewind = false)
+    {
+        $token = $this->getPreviousToken($rewind);
+        return is_array($token) ? $token['value'] : $token;
+    }
+
+    public function findNextTokenValue($tokenName, $direction = 1)
+    {
+        $i = $this->cursor;
+
+        do {
+            $i += $direction;
+            if ($this->isToken($this->tokens[$i], $tokenName)) {
+                break;
+            }
+        } while ($i >= 0 && $i < $this->count);
+        
+        return is_array($this->tokens[$i]) ? $this->tokens[$i]['value'] : $this->tokens[$i];
+    }
+
+    public function findPreviousTokenValue($tokenName)
+    {
+        return $this->findNextTokenValue($tokenName, -1);
+    }
+
+    public function getCursorPosition()
+    {
+        return $this->cursor;
+    }
+
+    public function seek($position)
+    {
+        $this->cursor = $position;
+        return $this;
     }
 }
