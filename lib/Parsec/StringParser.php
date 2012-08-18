@@ -86,6 +86,9 @@ class StringParser extends AbstractParser
     }
     
     /**
+     * Enters the context with the specified name and processes each tokens
+     * until the context exits
+     * 
      * @param string $context
      * @param array $params Context parameters
      * @return mixed Data returned by context
@@ -121,56 +124,25 @@ class StringParser extends AbstractParser
     }
 
     /**
-     * @return array
+     * Returns the position of the cursor
+     * 
+     * @return int
      */
-    public function getCurrentToken()
+    public function getCursorPosition()
     {
-        return $this->tokens[$this->cursor];
+        return $this->cursor;
     }
 
     /**
-     * @return mixed
-     */
-    public function getCurrentTokenValue()
-    {
-        return $this->tokens[$this->cursor]['value'];
-    }
-    
-    /**
-     * Checks if two tokens are equal
+     * Moves the cursor the the specified position
      * 
-     * @param mixed $token1
-     * @param string $token2
-     * @return bool
+     * @param int $position
+     * @return StringParser
      */
-    public function isToken($token, $tokenName)
+    public function seek($position)
     {
-        if (!is_array($token) && $tokenName == self::TOKEN_TEXT) {
-            return true;
-        }
-        return $token['token'] == $tokenName;
-    }
-    
-    /**
-     * Returns the name of a token
-     * 
-     * @param mixed $token
-     * @return string
-     */
-    public function getTokenName($token)
-    {
-        if (!is_array($token)) {
-            return self::TOKEN_TEXT;
-        }
-        return $token['token'];
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasMoreTokens()
-    {
-        return $this->cursor < $this->count;
+        $this->cursor = $position;
+        return $this;
     }
     
     /**
@@ -224,6 +196,34 @@ class StringParser extends AbstractParser
     {
         return $this->skipUntil($tokenName, -1);
     }
+
+    /**
+     * Retuns the token at the current position
+     * 
+     * @return array
+     */
+    public function getCurrentToken()
+    {
+        return $this->tokens[$this->cursor];
+    }
+
+    /**
+     * Returns the current token's value
+     * 
+     * @return mixed
+     */
+    public function getCurrentTokenValue()
+    {
+        return $this->tokens[$this->cursor]['value'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasMoreTokens()
+    {
+        return $this->cursor < $this->count;
+    }
     
     /**
      * Checks if the next token matches the specified one
@@ -260,6 +260,8 @@ class StringParser extends AbstractParser
     }
     
     /**
+     * Returns the next token
+     * 
      * @param bool $skip
      * @return array
      */
@@ -273,6 +275,8 @@ class StringParser extends AbstractParser
     }
     
     /**
+     * Returns the value of the next token
+     * 
      * @param bool $skip
      * @return string
      */
@@ -283,6 +287,8 @@ class StringParser extends AbstractParser
     }
     
     /**
+     * Returns the previous token
+     * 
      * @param bool $rewind
      * @return array
      */
@@ -296,6 +302,8 @@ class StringParser extends AbstractParser
     }
     
     /**
+     * Returns the value of the previous token
+     * 
      * @param bool $rewind
      * @return string
      */
@@ -305,6 +313,13 @@ class StringParser extends AbstractParser
         return is_array($token) ? $token['value'] : $token;
     }
 
+    /**
+     * Finds the next token with the specified name
+     * 
+     * @param string $tokenName
+     * @param integer $direction 1 to go forward, -1 to go backward
+     * @return mixed
+     */
     public function findNextTokenValue($tokenName, $direction = 1)
     {
         $i = $this->cursor;
@@ -319,19 +334,43 @@ class StringParser extends AbstractParser
         return is_array($this->tokens[$i]) ? $this->tokens[$i]['value'] : $this->tokens[$i];
     }
 
+    /**
+     * Same as {@see findNextTokenValue()} but searching backward
+     * 
+     * @param string $tokenName
+     * @return mixed
+     */
     public function findPreviousTokenValue($tokenName)
     {
         return $this->findNextTokenValue($tokenName, -1);
     }
-
-    public function getCursorPosition()
+    
+    /**
+     * Checks if two tokens are equal
+     * 
+     * @param mixed $token1
+     * @param string $token2
+     * @return bool
+     */
+    public function isToken($token, $tokenName)
     {
-        return $this->cursor;
+        if (!is_array($token) && $tokenName == self::TOKEN_TEXT) {
+            return true;
+        }
+        return $token['token'] == $tokenName;
     }
-
-    public function seek($position)
+    
+    /**
+     * Returns the name of a token
+     * 
+     * @param mixed $token
+     * @return string
+     */
+    public function getTokenName($token)
     {
-        $this->cursor = $position;
-        return $this;
+        if (!is_array($token)) {
+            return self::TOKEN_TEXT;
+        }
+        return $token['token'];
     }
 }

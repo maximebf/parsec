@@ -19,7 +19,7 @@
  
 namespace Parsec;
 
-class SyntaxException extends Exception
+class SyntaxException extends ParsecException
 {
     
 }

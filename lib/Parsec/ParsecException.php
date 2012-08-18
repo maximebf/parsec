@@ -19,7 +19,7 @@
  
 namespace Parsec;
 
-class Exception extends \Exception
+class ParsecException extends \Exception
 {
     
 }
