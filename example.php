@@ -1,14 +1,6 @@
 <?php
 
-set_include_path(implode(PATH_SEPARATOR, array(
-    __DIR__ . '/../lib',
-    get_include_path()
-)));
-
-spl_autoload_register(function($className) {
-    $filename = str_replace('\\', DIRECTORY_SEPARATOR, trim($className, '\\')) . '.php';
-    require_once $filename;
-});
+include __DIR__ . '/tests/bootstrap.php';
 
 class ArithParser extends Parsec\StringParser
 {
@@ -85,4 +77,3 @@ class Expression extends Parsec\Context
 $parser = new ArithParser();
 printf("3 + 4 = %s\n", $parser->parse('3 + 4'));
 printf("6 * (2 / 3) = %s\n", $parser->parse('6 * (2 / 3)'));
-
