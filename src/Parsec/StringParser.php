@@ -57,10 +57,10 @@ class StringParser extends AbstractParser
     }
     
     /**
-     * Parse the specified string. 
+     * Parses the specified string. 
      * Must specify the starting context
      *
-     * @param string $data
+     * @param string $string
      * @param string $context
      * @param array $params Context parameters
      * @param string $filename
@@ -68,12 +68,23 @@ class StringParser extends AbstractParser
      */
     public function parse($string, $context, array $params = array(), $filename = null)
     {
+        $this->tokenize($string, $filename);
+        return $this->enterContext($context, $params);
+    }
+
+    /**
+     * Tokenizes the string
+     *
+     * @param string $string
+     * @param string $filename
+     */
+    public function tokenize($string, $filename = null)
+    {
         $this->data = $string;
         $this->tokens = $this->lexer->tokenize($string, $filename);
+        $this->tokens[] = array('token' => self::TOKEN_EOS, 'value' => null, 'position' => null);
         $this->cursor = -1;
         $this->count = count($this->tokens);
-        
-        return $this->enterContext($context, $params);
     }
     
     /**
@@ -92,13 +103,9 @@ class StringParser extends AbstractParser
             $this->cursor++;
             $token = null; $value = null; $position = null;
             
-            if ($this->cursor >= $this->count) {
-                $token = self::TOKEN_EOS;
-
-            } else if (is_string($this->tokens[$this->cursor])) {
+            if (is_string($this->tokens[$this->cursor])) {
                 $token = self::TOKEN_TEXT;
                 $value = $this->tokens[$this->cursor];
-
             } else {
                 $token = $this->tokens[$this->cursor]['token'];
                 $value = $this->tokens[$this->cursor]['value'];
@@ -213,7 +220,7 @@ class StringParser extends AbstractParser
      */
     public function hasMoreTokens()
     {
-        return $this->cursor < $this->count;
+        return $this->cursor < $this->count - 1;
     }
     
     /**

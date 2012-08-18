@@ -20,6 +20,9 @@ class ContextFactory
 {
     /** @var array */
     protected $namespaces = array();
+
+    /** @var string */
+    protected $namespaceSeparator = '\\';
     
     /**
      * @param array $namespaces
@@ -37,15 +40,38 @@ class ContextFactory
     public function createInstance($className, array $constructorArgs = array())
     {
         foreach ($this->namespaces as $namespace) {
-            if (class_exists($namespace . $className)) {
-                $class = new ReflectionClass($namespace . $className);
+            $fqClassname = $namespace . $this->namespaceSeparator . $className;
+            if (class_exists($fqClassname)) {
+                $class = new ReflectionClass($fqClassname);
                 return $class->newInstanceArgs($constructorArgs);
             }
         }
         return null;
     }
+
+    /**
+     * Sets the namespace separator
+     * 
+     * @param string $separator
+     */
+    public function setNamespaceSeparator($separator)
+    {
+        $this->namespaceSeparator = $separator;
+    }
+
+    /**
+     * Returns the namespace separator
+     * 
+     * @return string
+     */
+    public function getNamespaceSeparator()
+    {
+        return $this->namespaceSeparator;
+    }
     
     /**
+     * Resets the namespaces
+     * 
      * @param array $namespaces
      * @return ContextFactory
      */
@@ -57,16 +83,20 @@ class ContextFactory
     }
     
     /**
+     * Adds a new namespace to search contexts in
+     * 
      * @param string $namespace
      * @return ContextFactory
      */
     public function addNamespace($namespace)
     {
-        $this->namespaces[] = rtrim((string) $namespace, '\\') . '\\';
+        $this->namespaces[] = trim((string) $namespace, $this->namespaceSeparator);
         return $this;
     }
     
     /**
+     * Returns all namespaces
+     * 
      * @return array
      */
     public function getNamespaces()
