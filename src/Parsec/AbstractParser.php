@@ -38,7 +38,7 @@ abstract class AbstractParser
     }
     
     /**
-     * @return ContectFactory
+     * @return ContextFactory
      */
     public function getContextFactory()
     {
